@@ -10,6 +10,7 @@ class MintPowers : JavaPlugin() {
     lateinit var playerManager: PlayerManager
     lateinit var powerManager: PowerManager
     lateinit var combatManager: CombatManager
+    lateinit var karmaManager: KarmaManager
     lateinit var powerRegistry: PowerRegistry
 
     override fun onEnable() {
@@ -17,11 +18,13 @@ class MintPowers : JavaPlugin() {
         playerManager = PlayerManager(this)
         powerManager = PowerManager(this)
         combatManager = CombatManager(this)
+        karmaManager = KarmaManager(this)
         powerRegistry = PowerRegistry(this)
 
         server.pluginManager.registerEvents(playerManager, this)
         server.pluginManager.registerEvents(powerManager, this)
         server.pluginManager.registerEvents(combatManager, this)
+        server.pluginManager.registerEvents(karmaManager, this)
 
        this.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
            val registrar = event.registrar()

@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
-import com.sun.org.apache.xalan.internal.lib.ExsltMath.power
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
@@ -90,7 +89,30 @@ class CommandManager(private val plugin: MintPowers) {
                 1
             })
 
-        val globalArgument = Commands.literal("global")
+        val globalArgument = Commands.literal("global").executes { context ->
+            val onlinePlayers = plugin.server.onlinePlayers
+
+            var totalKarma = 0
+
+            for (onlinePlayer in onlinePlayers) {
+                val pKarma = plugin.playerManager.getPlayerInfo(onlinePlayer.uniqueId)?.karma ?: 0
+                totalKarma += pKarma
+            }
+
+            var messageColor: NamedTextColor
+
+            if (totalKarma > 0) {
+                messageColor = NamedTextColor.GREEN
+            }
+            else {
+                messageColor = NamedTextColor.RED
+            }
+
+            context.source.sender.sendMessage(Component.text("Total server karma: $totalKarma", messageColor))
+
+            1
+        }
+
         val bountyArgument = Commands.literal("bounty")
 
         val root = Commands.literal("karma")
@@ -98,6 +120,7 @@ class CommandManager(private val plugin: MintPowers) {
                 .then(payArgument))
             .then(Commands.literal("set")
                 .then(setArgument))
+            .then(globalArgument)
             .executes { context ->
                 val player = context.source.sender as Player
 
@@ -135,10 +158,6 @@ class CommandManager(private val plugin: MintPowers) {
                 val power = plugin.powerRegistry.getPower(powerArg) ?: return@executes 0
 
                 val player = selector.resolve(context.source).firstOrNull() ?: return@executes 0
-
-                val playerInfo = plugin.playerManager.getPlayerInfo(player.uniqueId)
-
-                val powerSnapshot = playerInfo?.powers?.toList()
 
                 if (type == "grant") {
                     plugin.playerManager.grantPower(player.uniqueId, power.id)

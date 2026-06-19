@@ -1,0 +1,20 @@
+name: MintPowers
+description: $description
+version: '${version}'
+
+main: me.salty.mintpowers.MintPowers
+api-version: '26.1.2'
+load: POSTWORLD
+
+authors: [SaltyMint]
+
+commands:
+  power:
+    description: "Power manager."
+    permission: mintpowers.admin
+    permission-message: "§cYou do not have permission to use this command!"
+
+permissions:
+  mintpowers.admin:
+    description: "Allow access to admin commands."
+    default: op

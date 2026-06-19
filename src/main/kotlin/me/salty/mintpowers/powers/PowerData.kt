@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import kotlinx.serialization.Serializable
+import me.salty.mintpowers.MintPowers
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
@@ -117,7 +118,21 @@ data class Cooldown (
     var isOn: Boolean,
     val currentTicks: Long,
     val totalTicks: Long
-)
+) {
+
+    fun start(player: Player, metadata: PowerMetadata, plugin: MintPowers, cooldownMessage: Pair<String, NamedTextColor>) {
+
+        if (this.isOn) return
+
+        this.isOn = true
+
+        player.scheduler.runDelayed(plugin, {
+            this.isOn = false
+            player.sendActionBar(Component.text(cooldownMessage.first, cooldownMessage.second))
+        }, null, this.totalTicks)
+
+    }
+}
 
 data class PowerEvent<T : Event> (
     val original: T,

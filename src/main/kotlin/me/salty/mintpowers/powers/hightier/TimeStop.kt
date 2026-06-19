@@ -31,8 +31,8 @@ class TimeStop(plugin: MintPowers) : AbstractPower(plugin) {
         return PowerLogic(
             onPlayerSwapHands = { event ->
 
-                val player = event.original.player
                 val metadata = event.power.metadata
+                val player = event.original.player
 
                 val timeStopCooldown = metadata.getPlayerData(player.uniqueId, "time_stop", Cooldown(false, 0, 3600))
                 val timeStopDuration = 300L
@@ -40,7 +40,7 @@ class TimeStop(plugin: MintPowers) : AbstractPower(plugin) {
                 val abilitySlot = player.inventory.heldItemSlot
 
                 if (abilitySlot == 0 && !timeStopCooldown.isOn) {
-                    timeStopCooldown.isOn = true
+                    timeStopCooldown.start(player, metadata, plugin, Pair("Time stop has left cooldown.", NamedTextColor.GOLD))
 
                     event.original.isCancelled = true
 
@@ -77,11 +77,6 @@ class TimeStop(plugin: MintPowers) : AbstractPower(plugin) {
                         metadata.setPlayerData(player.uniqueId, "time_stop", Cooldown(true, 0, 3600))
                         revertEntities(player, frozenEntities)
                     }, null, timeStopDuration)
-
-                    player.scheduler.runDelayed(plugin, { task ->
-                        timeStopCooldown.isOn = false
-                        player.sendActionBar(Component.text("Time Stop has left cooldown.", NamedTextColor.GOLD))
-                    }, null, timeStopCooldown.totalTicks)
 
                 }
 

@@ -94,12 +94,10 @@ class Judgement(plugin: MintPowers) : AbstractPower(plugin) {
                 val abilitySlot = player.inventory.heldItemSlot
 
                 val judgeToggle = metadata.getPlayerData(player.uniqueId, "judge_toggle", false)
-                metadata.setPlayerData(player.uniqueId, "judge_toggle", judgeToggle)
 
                 val judgementCooldown = metadata.getPlayerData(player.uniqueId, "judgement_cooldown",
                     Cooldown(false, 0, 3600)
                 )
-                metadata.setPlayerData(player.uniqueId, "judgement_cooldown", judgementCooldown)
 
                 if (abilitySlot == 0) {
                     if (!judgeToggle) {
@@ -126,12 +124,11 @@ class Judgement(plugin: MintPowers) : AbstractPower(plugin) {
 
                         removePowersTemporarily(metadata, player, markedPlayer.first, plugin.playerManager.getPlayerInfo(markedPlayer.first.uniqueId), effectTime.toLong())
 
-                        metadata.setPlayerData(player.uniqueId, "judgement_cooldown", true)
-
                         player.sendActionBar(Component.text("${markedPlayer.first.name} has been judged.", NamedTextColor.DARK_RED))
 
                         markedPlayer.first.sendActionBar(Component.text("You have been judged and found wanting.", NamedTextColor.DARK_RED))
 
+                        judgementCooldown.start(player, metadata, plugin, Pair("Judgement has left cooldown.", NamedTextColor.GOLD))
                     }
                     else {
                         markedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.REGENERATION, effectTime, 0))
@@ -143,11 +140,9 @@ class Judgement(plugin: MintPowers) : AbstractPower(plugin) {
                         player.sendActionBar(Component.text("${markedPlayer.first.name} has been judged.", NamedTextColor.DARK_RED))
 
                         markedPlayer.first.sendActionBar(Component.text("You have been judged and found satisfying.", NamedTextColor.DARK_RED))
-                    }
 
-                    player.scheduler.runDelayed(plugin, {
-                        metadata.setPlayerData(player.uniqueId, "judgement_cooldown", false)
-                    }, null, 3600)
+                        judgementCooldown.start(player, metadata, plugin, Pair("Judgement has left cooldown.", NamedTextColor.GOLD))
+                    }
 
                 }
 

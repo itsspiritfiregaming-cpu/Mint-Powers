@@ -36,10 +36,8 @@ class WindChaser(plugin: MintPowers) : AbstractPower(plugin) {
 
             onPlayerMove = { event ->
 
-                if (!event.original.player.hasPotionEffect(PotionEffectType.SPEED) || !event.original.player.hasPotionEffect(
-                        PotionEffectType.WIND_CHARGED
-                    )
-                ) {
+                if (!event.original.player.hasPotionEffect(PotionEffectType.SPEED) || !event.original.player.hasPotionEffect(PotionEffectType.WIND_CHARGED)) {
+
                     event.original.player.addPotionEffect(
                         PotionEffect(
                             PotionEffectType.SPEED,
@@ -57,26 +55,9 @@ class WindChaser(plugin: MintPowers) : AbstractPower(plugin) {
 
             },
 
-            onPlayerPostRespawn = { event ->
-
-                event.original.player.addPotionEffect(
-                    PotionEffect(
-                        PotionEffectType.SPEED,
-                        PotionEffect.INFINITE_DURATION, 1, false, false
-                    )
-                )
-
-                event.original.player.addPotionEffect(
-                    PotionEffect(
-                        PotionEffectType.WIND_CHARGED,
-                        PotionEffect.INFINITE_DURATION, 0, false, true, false
-                    )
-                )
-
-            },
-
             onPlayerSwapHands = { event ->
 
+                val metadata = event.power.metadata
                 val player = event.original.player
 
                 val dashCooldown = event.power.metadata.getPlayerData(player.uniqueId, "dash_cooldown",
@@ -88,6 +69,7 @@ class WindChaser(plugin: MintPowers) : AbstractPower(plugin) {
                 val abilitySlot = player.inventory.heldItemSlot
 
                 if (abilitySlot == 0 && !dashCooldown.isOn) {
+                    dashCooldown.start(player, metadata, plugin, Pair("Dash has left cooldown", NamedTextColor.GOLD))
 
                     event.original.isCancelled = true
 
@@ -96,16 +78,11 @@ class WindChaser(plugin: MintPowers) : AbstractPower(plugin) {
                     val speed = 1.5
 
                     player.velocity = lookDir.multiply(speed)
-
-                    dashCooldown.isOn = true
-
-                    player.scheduler.runDelayed(plugin, { task ->
-                        dashCooldown.isOn = false
-                    }, null, dashCooldown.totalTicks)
-
                 }
 
                 if (abilitySlot == 1 && !windBulletCooldown.isOn) {
+
+                    dashCooldown.start(player, metadata, plugin, Pair("Wind bullet has left cooldown.", NamedTextColor.GOLD))
 
                     event.original.isCancelled = true
 
@@ -120,11 +97,6 @@ class WindChaser(plugin: MintPowers) : AbstractPower(plugin) {
                         windCharge.acceleration.copy(player.location.direction)
                     }
 
-                    windBulletCooldown.isOn = true
-
-                    player.scheduler.runDelayed(plugin, { task ->
-                        windBulletCooldown.isOn = false
-                    }, null, windBulletCooldown.totalTicks)
                 }
 
                 if (abilitySlot == 0 && dashCooldown.isOn) {
@@ -132,13 +104,9 @@ class WindChaser(plugin: MintPowers) : AbstractPower(plugin) {
                 }
 
                 if (abilitySlot == 1 && windBulletCooldown.isOn) {
-                    player.sendActionBar(
-                        Component.text(
-                            "Wind Bullet is on cooldown (8 seconds).",
-                            NamedTextColor.RED
-                        )
-                    )
+                    player.sendActionBar(Component.text("Wind Bullet is on cooldown (8 seconds).", NamedTextColor.RED))
                 }
+
             },
 
             onPlayerJump = { event ->

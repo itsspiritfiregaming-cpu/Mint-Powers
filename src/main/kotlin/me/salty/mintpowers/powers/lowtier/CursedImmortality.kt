@@ -27,5 +27,4 @@ class CursedImmortality(plugin: MintPowers) : AbstractPower(plugin) {
             }
         )
     }
-
 }

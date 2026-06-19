@@ -7,6 +7,7 @@ import me.salty.mintpowers.powers.hightier.TimeStop
 import me.salty.mintpowers.powers.lowtier.BladeHero
 import me.salty.mintpowers.powers.lowtier.CursedImmortality
 import me.salty.mintpowers.powers.lowtier.WindChaser
+import me.salty.mintpowers.powers.streettier.Arson
 import me.salty.mintpowers.powers.streettier.CatNature
 
 class PowerRegistry(plugin: MintPowers) {
@@ -25,6 +26,7 @@ class PowerRegistry(plugin: MintPowers) {
         register(BladeHero(plugin).build())
 
         register(CatNature(plugin).build())
+        register(Arson(plugin).build())
 
     }
 

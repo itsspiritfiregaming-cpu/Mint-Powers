@@ -65,6 +65,12 @@ class CatNature(plugin: MintPowers) : AbstractPower(plugin) {
                             false, false, false))
                     }
 
+                    if (to.block.type != Material.WATER) {
+                        player.removePotionEffect(PotionEffectType.WEAKNESS)
+                        player.removePotionEffect(PotionEffectType.SLOWNESS)
+                        player.removePotionEffect(PotionEffectType.UNLUCK)
+                    }
+
                 }
 
             },

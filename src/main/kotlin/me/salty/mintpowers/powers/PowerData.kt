@@ -15,7 +15,9 @@ import kotlinx.serialization.Serializable
 import me.salty.mintpowers.MintPowers
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import org.bukkit.event.block.BlockDamageEvent
 import org.bukkit.event.player.PlayerAnimationEvent
 import org.bukkit.event.player.PlayerItemHeldEvent
 import java.util.UUID
@@ -87,7 +89,7 @@ data class PowerMetadata (
     var toggles: HashMap<String, Boolean> = hashMapOf(),
     var counters: HashMap<String, Int> = hashMapOf(),
 ) {
-
+    
     inline fun <reified T> setPlayerData(playerUUID: UUID, key: String, value: T) {
         val scopedKey = "$playerUUID:$key"
 
@@ -154,6 +156,7 @@ data class PowerLogic (
     val onPlayerSwapHands: ((PowerEvent<PlayerSwapHandItemsEvent>) -> Unit)? = null,
     val onPlayerAnimation : ((PowerEvent<PlayerAnimationEvent>) -> Unit)? = null,
     val onPlayerHeldItem : ((PowerEvent<PlayerItemHeldEvent>) -> Unit)? = null,
+    val onPlayerDamageBlock : ((PowerEvent<BlockDamageEvent>) -> Unit)? = null,
 )
 
 

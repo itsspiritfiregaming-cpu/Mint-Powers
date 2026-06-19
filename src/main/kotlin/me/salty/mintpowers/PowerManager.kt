@@ -8,6 +8,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockDamageEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityToggleGlideEvent
@@ -92,6 +93,11 @@ class PowerManager(private val plugin: MintPowers) : Listener {
     @EventHandler
     fun onPlayerHeldItem(event: PlayerItemHeldEvent) {
         executeForPlayer(event.player, event) {it.onPlayerHeldItem}
+    }
+
+    @EventHandler
+    fun onPlayerDamageBlock(event: BlockDamageEvent) {
+        executeForPlayer(event.player, event) {it.onPlayerDamageBlock}
     }
 
     private inline fun <T : Event> executeForPlayer(player: Player, event: T, extractor: (PowerLogic) -> ((PowerEvent<T>) -> Unit)?) {

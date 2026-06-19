@@ -4,7 +4,6 @@ import io.papermc.paper.datacomponent.DataComponentTypes
 import me.salty.mintpowers.MintPowers
 import me.salty.mintpowers.powers.PowerLogic
 import me.salty.mintpowers.powers.AbstractPower
-import me.salty.mintpowers.powers.Cooldown
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player

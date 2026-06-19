@@ -23,7 +23,7 @@ class Judgement(plugin: MintPowers) : AbstractPower(plugin) {
     override val description: String = "What is a man before a God? Merely the observed before the observer. Your fate is mine to judge."
 
     val storedPlayers = HashMap<UUID, HashSet<String>>()
-    lateinit var judgedPlayer: Pair<Player, HashSet<String>>
+    lateinit var markedPlayer: Pair<Player, HashSet<String>>
 
     override fun provideLogic(): PowerLogic {
         return PowerLogic(
@@ -46,23 +46,24 @@ class Judgement(plugin: MintPowers) : AbstractPower(plugin) {
                     val hits = metadata.getPlayerData(attacker.uniqueId, "hits", 0) + 1
                     metadata.setPlayerData(attacker.uniqueId, "hits", hits)
 
-                    if (event.info.team.isEnemy(victimInfo.team)) {
-                        if (!victimHasPower) {
-                            event.original.damage *= 2
-                        }
-                    }
-                    else {
-                        event.original.isCancelled = true
-                        return@PowerLogic
-                    }
-
                     if (hits == 1) {
-                        if (event.info.team.isEnemy(victimInfo.team)) {
 
-                            if (metadata.getPlayerData(attacker.uniqueId, "judge_toggle", false)) {
-                                judgedPlayer = Pair(victim, victimInfo.powers)
-                                attacker.sendActionBar(Component.text("${victim.name} has been marked Judged.", NamedTextColor.GOLD))
+                        if (event.causerInfo.team.isEnemy(victimInfo.team)) {
+                            if (!victimHasPower) {
+                                event.original.damage *= 2
                             }
+                        }
+                        else {
+                            event.original.isCancelled = true
+                            return@PowerLogic
+                        }
+
+                        if (metadata.getPlayerData(attacker.uniqueId, "judge_toggle", false)) {
+                            markedPlayer = Pair(victim, victimInfo.powers)
+                            attacker.sendActionBar(Component.text("${victim.name} has been marked.", NamedTextColor.GOLD))
+                        }
+
+                        if (event.causerInfo.team.isEnemy(victimInfo.team)) {
 
                             removePowersTemporarily(metadata, attacker, victim, victimInfo, 200)
 
@@ -79,7 +80,7 @@ class Judgement(plugin: MintPowers) : AbstractPower(plugin) {
                 }
 
                 if (victimHasPower) {
-                    if (event.info.team.isEnemy(attackerInfo.team)) {
+                    if (event.causerInfo.team.isEnemy(attackerInfo.team)) {
                         event.original.damage /= 2
                     }
                 }
@@ -112,20 +113,42 @@ class Judgement(plugin: MintPowers) : AbstractPower(plugin) {
                     event.original.isCancelled = true
                 }
 
-                if (judgedPlayer.second.isNotEmpty() && !judgementCooldown.isOn) {
-                    val debuffTime = 600
+                if (abilitySlot == 1 && markedPlayer.second.isNotEmpty() && !judgementCooldown.isOn) {
 
-                    judgedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, debuffTime, 0))
-                    judgedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.WEAKNESS, debuffTime, 0))
-                    judgedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.MINING_FATIGUE, debuffTime, 0))
+                    val judgedPlayerInfo = plugin.playerManager.getPlayerInfo(markedPlayer.first.uniqueId) ?: return@PowerLogic
 
-                    removePowersTemporarily(metadata, player, judgedPlayer.first, plugin.playerManager.getPlayerInfo(judgedPlayer.first.uniqueId), debuffTime.toLong())
+                    val effectTime = 600
 
-                    metadata.setPlayerData(player.uniqueId, "judgement_cooldown", true)
+                    if (event.causerInfo.team.isEnemy(judgedPlayerInfo.team)) {
+                        markedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, effectTime, 0))
+                        markedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.WEAKNESS, effectTime, 0))
+                        markedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.MINING_FATIGUE, effectTime, 0))
+
+                        removePowersTemporarily(metadata, player, markedPlayer.first, plugin.playerManager.getPlayerInfo(markedPlayer.first.uniqueId), effectTime.toLong())
+
+                        metadata.setPlayerData(player.uniqueId, "judgement_cooldown", true)
+
+                        player.sendActionBar(Component.text("${markedPlayer.first.name} has been judged.", NamedTextColor.DARK_RED))
+
+                        markedPlayer.first.sendActionBar(Component.text("You have been judged and found wanting.", NamedTextColor.DARK_RED))
+
+                    }
+                    else {
+                        markedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.REGENERATION, effectTime, 0))
+                        markedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.RESISTANCE, effectTime, 0))
+                        markedPlayer.first.addPotionEffect(PotionEffect(PotionEffectType.HASTE, effectTime, 0))
+
+                        metadata.setPlayerData(player.uniqueId, "judgement_cooldown", true)
+
+                        player.sendActionBar(Component.text("${markedPlayer.first.name} has been judged.", NamedTextColor.DARK_RED))
+
+                        markedPlayer.first.sendActionBar(Component.text("You have been judged and found satisfying.", NamedTextColor.DARK_RED))
+                    }
 
                     player.scheduler.runDelayed(plugin, {
                         metadata.setPlayerData(player.uniqueId, "judgement_cooldown", false)
                     }, null, 3600)
+
                 }
 
             }

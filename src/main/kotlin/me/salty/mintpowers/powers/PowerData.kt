@@ -121,7 +121,7 @@ data class Cooldown (
 
 data class PowerEvent<T : Event> (
     val original: T,
-    val info: PlayerInfo,
+    val causerInfo: PlayerInfo,
     val power: PowerData
 )
 
